@@ -6,8 +6,8 @@
  */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
-const SRC = '/media/cangrejo-olla-mesa.mp4'
-const POSTER = '/media/cangrejo-poster.jpg'
+const SRC = 'https://res.cloudinary.com/tmm85q7f/video/upload/v1793163179/la-pata-gorda/brand/cangrejo-olla-mesa.mp4'
+const POSTER = 'https://res.cloudinary.com/tmm85q7f/image/upload/f_auto,q_auto,w_1280/v1793162829/la-pata-gorda/brand/cangrejo-poster.jpg'
 const root = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 const progress = ref(0)
@@ -56,7 +56,7 @@ const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, c
 <template>
   <section ref="root" class="vstory" aria-label="Así preparamos tu cangrejo">
     <div class="vstory-sticky">
-      <video ref="video" class="vstory-video" :src="SRC" :poster="POSTER" muted playsinline preload="auto" disablepictureinpicture />
+      <video ref="video" class="vstory-video" :src="SRC" :poster="POSTER" muted playsinline preload="auto" crossorigin="anonymous" disablepictureinpicture />
       <div class="vstory-shade" />
       <div class="vstory-head"><p class="vstory-kicker">De la olla a tu mesa</p><h2>Así preparamos <em>tu cangrejo</em></h2></div>
       <div class="vstory-captions"><p v-for="(c, i) in captions" :key="i" class="vcap" :class="{ on: stage === i }"><span class="num">{{ i + 1 }}</span>{{ c }}</p></div>
