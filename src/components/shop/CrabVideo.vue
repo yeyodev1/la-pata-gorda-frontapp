@@ -38,12 +38,11 @@ onMounted(() => {
   const v = video.value
   if (reduced || touch) { startAutoplay(); return }
   if (v) {
-    v.addEventListener('loadedmetadata', () => { ready.value = true; update() })
-    v.addEventListener('canplaythrough', () => { ready.value = true }, { once: true })
+    const markReady = () => { if (!ready.value) { ready.value = true; lastSet = -1; update() } }
+    v.addEventListener('loadedmetadata', markReady)
+    v.addEventListener('loadeddata', markReady)
     v.addEventListener('error', startAutoplay)
-    // Safari iOS no precarga sin interacción: si tras 4 s no hay metadatos, reproducir en bucle.
-    window.setTimeout(() => { if (!ready.value || v.readyState < 2) startAutoplay() }, 4000)
-    v.load()
+    if (v.readyState >= 1) markReady()
   }
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll)
