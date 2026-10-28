@@ -8,12 +8,12 @@ const OFICINA: UserRole[] = ['admin', 'gerencia', 'contabilidad']
 const routes: RouteRecordRaw[] = [
   { path: '/login', name: 'Login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Ingresar', public: true } },
   // Tienda en línea (pública)
-  { path: '/tienda', name: 'Store', component: () => import('@/views/shop/StoreView.vue'), meta: { title: 'Pedidos en línea', public: true } },
+  { path: '/', name: 'Store', component: () => import('@/views/shop/StoreView.vue'), meta: { title: 'Pedidos en línea', public: true } },
+  { path: '/tienda', redirect: '/' },
   { path: '/tienda/checkout', name: 'Checkout', component: () => import('@/views/shop/CheckoutView.vue'), meta: { title: 'Confirmar pedido', public: true } },
   { path: '/tienda/pedido/:code', name: 'Track', component: () => import('@/views/shop/TrackView.vue'), meta: { title: 'Tu pedido', public: true } },
   { path: '/tienda/pago', name: 'PayphoneReturn', component: () => import('@/views/shop/PayphoneReturnView.vue'), meta: { title: 'Pago', public: true } },
   { path: '/tienda/reservar', name: 'Reserve', component: () => import('@/views/shop/ReserveView.vue'), meta: { title: 'Reservar mesa', public: true } },
-  { path: '/', name: 'Home', redirect: '/panel' },
   { path: '/pedidos-tienda', name: 'ShopBoard', component: () => import('@/views/shop/ShopBoardView.vue'), meta: { title: 'Pedidos de la tienda', roles: ['local', 'atencion', 'produccion', ...OFICINA] } },
   { path: '/panel', name: 'Dashboard', component: () => import('@/views/DashboardView.vue'), meta: { title: 'Panel', roles: ALL } },
   { path: '/alertas', name: 'Alerts', component: () => import('@/views/AlertsView.vue'), meta: { title: 'Alertas', roles: ALL } },
@@ -59,7 +59,6 @@ router.beforeEach(async (to) => {
   if (!userStore.isLogged) return { name: 'Login', query: { next: to.fullPath } }
   const roles = to.meta.roles as UserRole[] | undefined
   const role = userStore.role
-  if (to.name === 'Home' && role) return ROLE_HOME[role]
   if (roles && role && !roles.includes(role) && role !== 'admin' && role !== 'gerencia') return ROLE_HOME[role]
   return true
 })
