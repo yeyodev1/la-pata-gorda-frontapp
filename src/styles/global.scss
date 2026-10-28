@@ -2,31 +2,32 @@
 @use 'mixins' as *;
 
 :root {
-  // Marca: rojo cangrejo (primario), dorado (acento), azul mar (informativo). Fondo crema cálido.
-  --navy-900: #4f1914;
-  --navy-800: #8f1d1d;
-  --navy-700: #a8352b;
-  --blue-500: #1f6f8b;
-  --blue-100: #e4f1f5;
+  // Marca La Pata Gorda: azul del logo (primario), crema (fondos y texto sobre azul), rojo cangrejo (acento). 
+  --navy-900: #0d2f78;
+  --navy-800: #1f5fd6;
+  --navy-700: #2a6fe8;
+  --blue-500: #1f5fd6;
+  --blue-100: #e3ecfb;
   --green-600: #1f8a5f;
   --green-500: #2aa876;
   --green-100: #e2f5ec;
   --amber-600: #a86f12;
   --amber-500: #f5c04a;
   --amber-100: #fdf3d6;
-  --red-600: #b42318;
-  --red-500: #d92d20;
-  --red-100: #fde8e6;
+  --red-600: #c6391f;
+  --red-500: #e8572b;
+  --red-100: #fde8e2;
   --sky-100: #e0f2fe;
-  --gray-50: #faf7f3;
-  --gray-100: #f1ece6;
-  --gray-200: #e3dcd4;
-  --gray-300: #c9bfb5;
-  --gray-500: #7a6f66;
-  --gray-700: #463d37;
-  --gray-900: #1f1816;
+  --gray-50: #faf8f2;
+  --gray-100: #f2efe6;
+  --gray-200: #e3dfd3;
+  --gray-300: #c9c3b4;
+  --gray-500: #76716a;
+  --gray-700: #3f3b36;
+  --gray-900: #1c1a17;
 
-  --bg: #fbf7f2;
+  --bg: #f8f4ea;
+  --cream: #f6efd6;
   --surface: #ffffff;
   --surface-2: var(--gray-50);
   --border: var(--gray-200);
@@ -34,7 +35,7 @@
   --text-muted: var(--gray-500);
   --primary: var(--navy-800);
   --primary-contrast: #ffffff;
-  --accent: var(--amber-500);
+  --accent: var(--red-500);
   --header-h: #{$header-h};
   --sidenav-w: #{$sidenav-w};
 }
