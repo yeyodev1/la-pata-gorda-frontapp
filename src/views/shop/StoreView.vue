@@ -40,7 +40,7 @@ function goCheckout() { if (!cart.lines.length || !branch.value) return; cartOpe
   <div class="store">
     <header class="store-top">
       <div class="store-top-inner">
-        <RouterLink to="/tienda" class="logo"><img src="/brand/favicon.svg" alt="" /><span><strong>La Pata Gorda</strong><small>Pedidos en línea</small></span></RouterLink>
+        <RouterLink to="/" class="logo"><img src="/brand/favicon.svg" alt="" /><span><strong>La Pata Gorda</strong><small>Pedidos en línea</small></span></RouterLink>
         <button class="branch-btn" type="button" @click="branchOpen = true"><i class="fa-solid fa-location-dot" /><span v-if="branch"><strong>{{ branch.name }}</strong><small>{{ cart.type === 'retiro' ? `Retiro · listo en ~${branch.prepMinutes} min` : `A domicilio · envío ${money(branch.deliveryFee)}` }}</small></span><span v-else>Elige tu local</span><i class="fa-solid fa-chevron-down" /></button>
         <div class="top-actions"><RouterLink to="/tienda/reservar" class="link-btn"><i class="fa-solid fa-calendar-check" /> Reservar mesa</RouterLink><button class="cart-btn" type="button" @click="cartOpen = true"><i class="fa-solid fa-basket-shopping" /><span v-if="cart.count" class="count">{{ cart.count }}</span></button></div>
       </div>
