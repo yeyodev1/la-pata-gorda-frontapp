@@ -17,6 +17,8 @@ let raf = 0
 let targetTime = 0
 let lastSet = -1
 const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+// En celular (sin hover) el "scrub" por scroll es brusco y Safari no precarga: mejor reproducir en bucle.
+const touch = typeof window !== 'undefined' && window.matchMedia?.('(hover: none)').matches
 
 function update() {
   raf = 0
@@ -34,13 +36,13 @@ function onScroll() { if (!raf) raf = requestAnimationFrame(update) }
 function startAutoplay() { autoplay.value = true; const v = video.value; if (v) { v.loop = true; v.play().catch(() => undefined) } }
 onMounted(() => {
   const v = video.value
-  if (reduced) { startAutoplay(); return }
+  if (reduced || touch) { startAutoplay(); return }
   if (v) {
     v.addEventListener('loadedmetadata', () => { ready.value = true; update() })
     v.addEventListener('canplaythrough', () => { ready.value = true }, { once: true })
     v.addEventListener('error', startAutoplay)
     // Safari iOS no precarga sin interacción: si tras 4 s no hay metadatos, reproducir en bucle.
-    window.setTimeout(() => { if (!ready.value) startAutoplay() }, 4000)
+    window.setTimeout(() => { if (!ready.value || v.readyState < 2) startAutoplay() }, 4000)
     v.load()
   }
   window.addEventListener('scroll', onScroll, { passive: true })
@@ -68,8 +70,8 @@ const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, c
 .vstory { position: relative; height: 260vh; }
 .vstory-sticky { position: sticky; top: calc(var(--story-top, 100px)); height: calc(100vh - var(--story-top, 100px) - 12px); border-radius: 26px; overflow: hidden; background: #0d2f78; box-shadow: 0 20px 50px rgba(13,47,120,0.35); }
 .vstory-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.vstory-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,47,120,0.55) 0%, rgba(13,47,120,0) 35%, rgba(13,47,120,0) 60%, rgba(13,47,120,0.7) 100%); pointer-events: none; }
-.vstory-head { position: absolute; top: 1.4rem; left: 1.6rem; right: 1.6rem; color: #f6efd6; .vstory-kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.7rem; font-weight: 800; opacity: 0.9; } h2 { margin: 0.2rem 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 4vw, 3rem); line-height: 1.05; em { font-style: italic; font-weight: 300; } } }
+.vstory-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,47,120,0.7) 0%, rgba(13,47,120,0) 38%, rgba(13,47,120,0) 60%, rgba(13,47,120,0.7) 100%); pointer-events: none; }
+.vstory-head { position: absolute; top: 1.4rem; left: 1.6rem; right: 1.6rem; color: #f6efd6; .vstory-kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.7rem; font-weight: 800; opacity: 0.9; } h2 { margin: 0.2rem 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 4vw, 3rem); line-height: 1.05; color: #f6efd6; text-shadow: 0 2px 14px rgba(0,0,0,0.35); em { font-style: italic; font-weight: 300; } } }
 .vstory-captions { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 2.2rem; display: flex; justify-content: center; pointer-events: none; }
 .vcap { position: absolute; bottom: 0; margin: 0; max-width: 620px; background: rgba(246,239,214,0.92); color: #0d2f78; border-radius: 16px; padding: 0.75rem 1.1rem; font-weight: 700; font-size: 1rem; display: flex; gap: 0.7rem; align-items: center; opacity: 0; transform: translateY(14px); transition: opacity 0.4s, transform 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.25); &.on { opacity: 1; transform: none; } .num { width: 28px; height: 28px; border-radius: 50%; background: #e8572b; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; flex: none; font-size: 0.8rem; } }
 .vstory-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: rgba(246,239,214,0.25); span { display: block; height: 100%; background: #e8572b; transition: width 0.1s linear; } }
