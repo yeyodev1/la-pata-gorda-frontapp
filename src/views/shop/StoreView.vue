@@ -56,7 +56,7 @@ const hours = computed(() => data.value?.branches[0]?.hours ?? '12:00-22:00')
 watch(() => cart.type, (t) => { if (t === 'domicilio' && branch.value && !branch.value.deliveryEnabled) cart.type = 'retiro' })
 let pendingAction: (() => void) | null = null
 function selectBranch(id: string) { cart.branch = id; branchOpen.value = false; const b = data.value?.branches.find((x) => x.id === id); if (b && cart.type === 'domicilio' && !b.deliveryEnabled) cart.type = 'retiro'; if (pendingAction) { const f = pendingAction; pendingAction = null; setTimeout(f, 50) } }
-function needBranch(then: () => void) { if (!branch.value) { pendingAction = then; branchOpen.value = true } else then() }
+function needBranch(then: () => void) { if (!branch.value) { pendingAction = then; cartOpen.value = false; picking.value = null; branchOpen.value = true } else then() }
 const inCart = (p: ShopProduct) => cart.lines.filter((l) => l.product.id === p.id).reduce((a, l) => a + l.qty, 0)
 const hasRequired = (p: ShopProduct) => p.options.some((o) => o.required)
 function flash(id: string) { justAdded.value = id; clearTimeout(addedTimer); addedTimer = window.setTimeout(() => { justAdded.value = '' }, 1200) }

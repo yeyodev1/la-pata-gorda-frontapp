@@ -9,6 +9,8 @@ const props = defineProps<{ apiKey: string; branch: { name: string; lat: number 
 const emit = defineEmits<{ 'update:modelValue': [v: { text: string; lat: number | null; lng: number | null }] }>()
 const mapEl = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLInputElement | null>(null)
+const acHost = ref<HTMLElement | null>(null)
+const acMode = ref<'nuevo' | 'clasico' | 'manual'>('manual')
 const status = ref<'cargando' | 'listo' | 'error'>('cargando')
 const locating = ref(false)
 let map: google.maps.Map | null = null
@@ -33,6 +35,8 @@ function setPoint(lat: number, lng: number, text?: string) {
   if (text !== undefined) emit('update:modelValue', { text, lat, lng })
   else { emit('update:modelValue', { ...props.modelValue, lat, lng }); geocoder?.geocode({ location: { lat, lng } }, (res, st) => { if (st === 'OK' && res?.[0]) emit('update:modelValue', { text: res[0].formatted_address.replace(/, Ecuador$/, ''), lat, lng }) }) }
 }
+/** Sin autocompletado: geocodificar lo escrito al presionar Enter o salir del campo. */
+function searchTyped() { const q = props.modelValue.text.trim(); if (!geocoder || q.length < 4) return; geocoder.geocode({ address: q, componentRestrictions: { country: 'EC' } }, (res, st) => { if (st === 'OK' && res?.[0]?.geometry?.location) { const l = res[0].geometry.location; setPoint(l.lat(), l.lng(), res[0].formatted_address.replace(/, Ecuador$/, '')); map?.setZoom(16) } }) }
 function useMyLocation() { if (!navigator.geolocation) return; locating.value = true; navigator.geolocation.getCurrentPosition((p) => { locating.value = false; setPoint(p.coords.latitude, p.coords.longitude); map?.setZoom(16) }, () => { locating.value = false }, { enableHighAccuracy: true, timeout: 8000 }) }
 function drawBranch() {
   if (!map || !props.branch || props.branch.lat == null || props.branch.lng == null) return
@@ -54,9 +58,27 @@ onMounted(async () => {
     marker.addListener('dragend', () => { const p = marker!.getPosition(); if (p) setPoint(p.lat(), p.lng()) })
     map.addListener('click', (e: google.maps.MapMouseEvent) => { if (e.latLng) setPoint(e.latLng.lat(), e.latLng.lng()) })
     drawBranch()
-    if (inputEl.value) {
-      const ac = new google.maps.places.Autocomplete(inputEl.value, { componentRestrictions: { country: ['ec', 'us'] }, fields: ['geometry', 'formatted_address', 'name'] })
-      ac.addListener('place_changed', () => { const pl = ac.getPlace(); const loc = pl.geometry?.location; if (!loc) return; setPoint(loc.lat(), loc.lng(), (pl.formatted_address ?? pl.name ?? '').replace(/, Ecuador$/, '')); map?.setZoom(16) })
+    // Autocompletado: primero el componente nuevo de Google; si no está, el clásico; si tampoco, buscar con Enter.
+    const placesLib = google.maps.places as unknown as { PlaceAutocompleteElement?: new (o: Record<string, unknown>) => HTMLElement & { addEventListener: HTMLElement['addEventListener'] } }
+    let acReady = false
+    if (placesLib.PlaceAutocompleteElement && acHost.value) {
+      try {
+        const el = new placesLib.PlaceAutocompleteElement({ includedRegionCodes: ['ec', 'us'] })
+        el.addEventListener('gmp-select', async (ev: Event) => {
+          const pred = (ev as unknown as { placePrediction?: { toPlace: () => { fetchFields: (o: { fields: string[] }) => Promise<unknown>; location?: google.maps.LatLng | null; formattedAddress?: string | null; displayName?: string | null } } }).placePrediction
+          if (!pred) return
+          const place = pred.toPlace(); await place.fetchFields({ fields: ['location', 'formattedAddress', 'displayName'] })
+          if (place.location) { setPoint(place.location.lat(), place.location.lng(), (place.formattedAddress ?? place.displayName ?? '').replace(/, Ecuador$/, '')); map?.setZoom(16) }
+        })
+        acHost.value.innerHTML = ''; acHost.value.appendChild(el); acReady = true; acMode.value = 'nuevo'
+      } catch { acReady = false }
+    }
+    if (!acReady && inputEl.value) {
+      try {
+        const ac = new google.maps.places.Autocomplete(inputEl.value, { componentRestrictions: { country: ['ec', 'us'] }, fields: ['geometry', 'formatted_address', 'name'] })
+        ac.addListener('place_changed', () => { const pl = ac.getPlace(); const loc = pl.geometry?.location; if (!loc) return; setPoint(loc.lat(), loc.lng(), (pl.formatted_address ?? pl.name ?? '').replace(/, Ecuador$/, '')); map?.setZoom(16) })
+        acMode.value = 'clasico'
+      } catch { acMode.value = 'manual' }
     }
     status.value = 'listo'
   } catch { status.value = 'error' }
@@ -66,8 +88,9 @@ onBeforeUnmount(() => { marker?.setMap(null); branchMarker?.setMap(null); circle
 </script>
 <template>
   <div class="dmap">
-    <div class="dmap-search"><i class="fa-solid fa-magnifying-glass" /><input ref="inputEl" :value="modelValue.text" placeholder="Escribe tu dirección y elígela de la lista…" autocomplete="off" @input="emit('update:modelValue', { ...modelValue, text: ($event.target as HTMLInputElement).value })" /><button type="button" class="dmap-loc" :disabled="locating" title="Usar mi ubicación" @click="useMyLocation"><i class="fa-solid" :class="locating ? 'fa-circle-notch fa-spin' : 'fa-location-crosshairs'" /></button></div>
+    <div class="dmap-search"><i class="fa-solid fa-magnifying-glass" /><div v-show="acMode === 'nuevo'" ref="acHost" class="dmap-ac" /><input v-show="acMode !== 'nuevo'" ref="inputEl" :value="modelValue.text" placeholder="Escribe tu dirección y presiona Enter…" autocomplete="off" @input="emit('update:modelValue', { ...modelValue, text: ($event.target as HTMLInputElement).value })" @keydown.enter.prevent="searchTyped" @blur="acMode === 'manual' && searchTyped()" /><button type="button" class="dmap-loc" :disabled="locating" title="Usar mi ubicación" @click="useMyLocation"><i class="fa-solid" :class="locating ? 'fa-circle-notch fa-spin' : 'fa-location-crosshairs'" /></button></div>
     <div class="dmap-canvas"><div ref="mapEl" class="dmap-map" /><p v-if="status === 'cargando'" class="dmap-state"><i class="fa-solid fa-circle-notch fa-spin" /> Cargando mapa…</p><p v-else-if="status === 'error'" class="dmap-state">No se pudo cargar el mapa. Escribe la dirección y referencia abajo.</p></div>
+    <p v-if="acMode === 'nuevo' && modelValue.text" class="dmap-sel"><i class="fa-solid fa-location-dot" /> {{ modelValue.text }}</p>
     <p class="dmap-hint"><i class="fa-solid fa-hand-pointer" /> Arrastra el pin rojo hasta tu puerta.<template v-if="distanceKm != null"> · <strong>{{ distanceKm }} km</strong> de {{ branch?.name }}</template></p>
     <p v-if="outOfRange" class="dmap-warn"><i class="fa-solid fa-triangle-exclamation" /> Queda fuera del radio de entrega de {{ branch?.name }} ({{ branch?.deliveryRadiusKm }} km). Elige otro local o retira en el local.</p>
   </div>
@@ -75,6 +98,8 @@ onBeforeUnmount(() => { marker?.setMap(null); branchMarker?.setMap(null); circle
 <style scoped lang="scss">
 .dmap { display: flex; flex-direction: column; gap: 0.5rem; }
 .dmap-search { display: flex; align-items: center; gap: 0.5rem; border: 1.5px solid rgba(13,47,120,0.2); border-radius: 12px; padding: 0 0.4rem 0 0.9rem; background: #fff; color: rgba(13,47,120,0.6); &:focus-within { border-color: #1f5fd6; box-shadow: 0 0 0 3px rgba(31,95,214,0.18); } input { flex: 1; border: none; outline: none; min-height: 48px; font: inherit; color: #0d2f78; background: transparent; min-width: 0; } }
+.dmap-ac { flex: 1; min-width: 0; :deep(gmp-place-autocomplete) { width: 100%; --gmp-mat-color-surface: #fff; --gmp-mat-color-on-surface: #0d2f78; --gmp-mat-color-primary: #1f5fd6; font-family: inherit; } }
+.dmap-sel { margin: 0; font-size: 0.9rem; font-weight: 700; color: #0d2f78; i { color: #e8572b; } }
 .dmap-loc { width: 40px; height: 40px; border-radius: 10px; border: none; background: #f6efd6; color: #1f5fd6; cursor: pointer; font-size: 1rem; &:hover { background: #ece2c0; } }
 .dmap-canvas { position: relative; height: 300px; border-radius: 14px; overflow: hidden; background: #e9eef6; }
 .dmap-map { position: absolute; inset: 0; }
