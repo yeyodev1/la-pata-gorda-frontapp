@@ -22,7 +22,7 @@ const NAV: NavSection[] = [
   ] },
   { label: 'Tienda en línea', items: [
     { to: '/pedidos-tienda', label: 'Pedidos de la tienda', icon: 'fa-bell-concierge', roles: ['local', 'atencion', 'produccion', ...OF], desc: 'Pantalla de pedidos: suena al llegar uno' },
-    { to: '/tienda', label: 'Ver la tienda', icon: 'fa-bag-shopping', roles: ALL, desc: 'Como la ve el cliente' },
+    { to: '/', label: 'Ver la tienda', icon: 'fa-bag-shopping', roles: ALL, desc: 'Como la ve el cliente' },
   ] },
   { label: 'Mi local', items: [
     { to: '/mi-local', label: 'Mi local', icon: 'fa-store', roles: ['local', ...OF, 'produccion'], desc: 'Resumen y tareas del día' },
@@ -92,7 +92,7 @@ async function logout() {
     <header class="topbar">
       <div class="topbar-left">
         <button class="menu-btn" type="button" :aria-label="drawerOpen ? 'Cerrar menú' : 'Abrir menú'" @click="drawerOpen = !drawerOpen"><i class="fa-solid" :class="drawerOpen ? 'fa-xmark' : 'fa-bars'" /></button>
-        <RouterLink to="/" class="brand"><span class="brand-mark"><img src="/brand/favicon.svg" alt="La Pata Gorda" /></span><span class="brand-text"><span class="brand-name">LA PATA GORDA</span><span class="brand-page">{{ pageTitle }}</span></span></RouterLink>
+        <RouterLink to="/panel" class="brand"><span class="brand-mark"><img src="/brand/favicon.svg" alt="La Pata Gorda" /></span><span class="brand-text"><span class="brand-name">LA PATA GORDA</span><span class="brand-page">{{ pageTitle }}</span></span></RouterLink>
       </div>
       <div class="session">
         <RouterLink to="/alertas" class="icon-btn" title="Alertas"><i class="fa-solid fa-bell" /><span v-if="alertCount" class="pill">{{ alertCount > 99 ? '99+' : alertCount }}</span></RouterLink>
