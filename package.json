@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
@@ -21,6 +23,7 @@
     "vue-router": "^4.6.0"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.66.8",
     "@types/node": "^22.10.5",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.8.1",

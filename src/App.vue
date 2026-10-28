@@ -19,7 +19,11 @@ const showShell = computed(() => !route.meta.public && userStore.isLogged)
       </Transition>
     </RouterView>
   </AppShell>
-  <RouterView v-else />
+  <RouterView v-else v-slot="{ Component }">
+    <Transition name="page" mode="out-in">
+      <component :is="Component" :key="route.path" />
+    </Transition>
+  </RouterView>
   <ToastList />
   <ConfirmDialog />
 </template>
