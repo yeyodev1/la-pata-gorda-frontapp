@@ -12,6 +12,10 @@ import type { CustomerOrder, CustomerOrderStatus } from '@/types'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import PageIntro from '@/components/ui/PageIntro.vue'
+import BaseDatePicker from '@/components/ui/BaseDatePicker.vue'
+import SearchBox from '@/components/ui/SearchBox.vue'
+import Pager from '@/components/ui/Pager.vue'
+import { todayStr, addDaysStr } from '@/utils/format'
 
 const userStore = useUserStore()
 const catalog = useCatalogStore()
@@ -20,6 +24,16 @@ const toast = useToastStore()
 const branch = ref<string>(userStore.branchId ?? '')
 const { data, run } = useAsync(() => api.shopBoard(branch.value || undefined))
 const selected = ref<CustomerOrder | null>(null)
+const tab = ref<'tablero' | 'historial'>('tablero')
+const hFrom = ref(addDaysStr(todayStr(), -7))
+const hTo = ref(todayStr())
+const hQ = ref('')
+const hStatus = ref('')
+const hPage = ref(1)
+const { data: history, loading: hLoading, run: loadHistory } = useAsync(() => api.shopOrders({ branch: branch.value || undefined, from: hFrom.value, to: hTo.value, q: hQ.value || undefined, status: hStatus.value || undefined, page: hPage.value, limit: 50 }))
+watch([tab, hFrom, hTo, hQ, hStatus, hPage], () => { if (tab.value === 'historial') loadHistory() })
+const STATUS_OPTIONS = [{ value: '', label: 'Todos los estados' }, { value: 'entregado', label: 'Entregados' }, { value: 'cancelado', label: 'Cancelados' }, { value: 'nuevo,aceptado,en_preparacion,listo,en_camino', label: 'En curso' }]
+const hTotal = computed(() => (history.value?.items ?? []).filter((o) => o.status !== 'cancelado').reduce((a, o) => a + o.total, 0))
 const soundOn = ref((() => { try { return localStorage.getItem('lpg.board.sound') !== 'off' } catch { return true } })())
 let timer: number | undefined
 let known = new Set<string>()
@@ -56,8 +70,15 @@ function print(o: CustomerOrder) { const w = window.open('', '_blank', 'width=40
 <template>
   <div class="page board">
     <div class="page-head"><div class="title"><span class="eyebrow">Tienda en línea</span><h1>Pedidos <span v-if="data?.newCount" class="badge danger" style="font-size:0.9rem;vertical-align:middle">{{ data.newCount }} nuevo(s)</span></h1></div><div class="actions"><BaseSelect v-if="!userStore.is('local')" v-model="branch" :options="BRANCH_OPTIONS" :searchable="false" style="min-width:220px" /><button class="btn" :class="{ accent: soundOn }" type="button" @click="soundOn = !soundOn"><i class="fa-solid" :class="soundOn ? 'fa-volume-high' : 'fa-volume-xmark'" /> {{ soundOn ? 'Sonido' : 'Silencio' }}</button><button class="btn sm" type="button" @click="beep(); poll()"><i class="fa-solid fa-rotate" /></button></div></div>
-    <PageIntro id="board" icon="fa-bell-concierge"><p>Deja esta pantalla abierta en la caja, como un Uber más. Cuando entra un pedido <strong>suena y aparece en "Nuevos"</strong>: acéptalo, ingrésalo en el POS (marca la casilla), pásalo a cocina y márcalo listo o entregado. El cliente ve cada paso en su link de seguimiento. Se actualiza sola cada 10 segundos.</p></PageIntro>
-    <div class="cols cols-3 board-cols">
+    <div class="tabs"><button :class="{ active: tab === 'tablero' }" @click="tab = 'tablero'"><i class="fa-solid fa-table-columns" /> Tablero</button><button :class="{ active: tab === 'historial' }" @click="tab = 'historial'"><i class="fa-solid fa-clock-rotate-left" /> Historial</button></div>
+    <template v-if="tab === 'historial'">
+      <div class="row" style="margin-bottom:0.75rem"><BaseDatePicker v-model="hFrom" :clearable="false" /><BaseDatePicker v-model="hTo" :clearable="false" /><BaseSelect v-model="hStatus" :options="STATUS_OPTIONS" :searchable="false" style="min-width:190px" /><SearchBox v-model="hQ" placeholder="Número, nombre o teléfono…" /><span class="spacer" /><span class="badge info">{{ history?.total ?? 0 }} pedidos · {{ money(hTotal) }} en esta página</span></div>
+      <div v-if="hLoading && !history" class="muted">Cargando…</div>
+      <div v-else class="table-wrap"><table class="table"><thead><tr><th>Pedido</th><th>Cuándo</th><th>Cliente</th><th>Local</th><th>Tipo</th><th>Pago</th><th class="num">Total</th><th>Estado</th></tr></thead><tbody><tr v-for="o in history?.items" :key="o._id" class="clickable" @click="selected = o"><td><strong>{{ o.number }}</strong></td><td class="muted small">{{ dateTime(o.createdAt) }}</td><td>{{ o.customer.name }}<span class="hint" style="display:block">{{ o.customer.phone }}</span></td><td>{{ o.branchName }}</td><td>{{ o.type === 'retiro' ? 'Retiro' : 'Domicilio' }}</td><td><span class="badge" :class="o.payment.status === 'pagado' ? 'ok' : 'warn'">{{ PAY[o.payment.method] }}</span></td><td class="num">{{ money(o.total) }}</td><td><span class="badge" :class="o.status === 'entregado' ? 'ok' : o.status === 'cancelado' ? 'danger' : 'info'">{{ LABEL[o.status] }}</span></td></tr></tbody></table></div>
+      <Pager v-if="history" :page="history.page" :pages="history.pages" :total="history.total" @change="hPage = $event" />
+    </template>
+    <PageIntro v-if="tab === 'tablero'" id="board" icon="fa-bell-concierge"><p>Deja esta pantalla abierta en la caja, como un Uber más. Cuando entra un pedido <strong>suena y aparece en "Nuevos"</strong>: acéptalo, ingrésalo en el POS (marca la casilla), pásalo a cocina y márcalo listo o entregado. El cliente ve cada paso en su link de seguimiento. Se actualiza sola cada 10 segundos.</p></PageIntro>
+    <div v-if="tab === 'tablero'" class="cols cols-3 board-cols">
       <div v-for="c in COLS" :key="c.label" class="bcol"><p class="section-label"><i class="fa-solid" :class="c.icon" /> {{ c.label }} ({{ col(c.key).length }})</p>
         <div v-for="o in col(c.key)" :key="o._id" class="card ocard" :class="[o.status, { pos: o.enteredInPos }]" @click="selected = o">
           <div class="ohead"><strong>{{ o.number }}</strong><span class="badge" :class="o.type === 'domicilio' ? 'sky' : 'info'"><i class="fa-solid" :class="o.type === 'domicilio' ? 'fa-motorcycle' : 'fa-store'" /> {{ o.type === 'domicilio' ? 'Domicilio' : 'Retiro' }}</span><span class="muted small">{{ timeAgo(o.createdAt) }}</span></div>
@@ -70,7 +91,7 @@ function print(o: CustomerOrder) { const w = window.open('', '_blank', 'width=40
         <p v-if="!col(c.key).length" class="muted small" style="padding:0.5rem">—</p>
       </div>
     </div>
-    <div v-if="data?.done.length" class="card" style="margin-top:1rem"><div class="card-head"><h3>Cerrados hoy ({{ data.done.length }})</h3></div><div class="table-wrap" style="box-shadow:none;border:none"><table class="table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Local</th><th>Tipo</th><th class="num">Total</th><th>Estado</th><th>Cuándo</th></tr></thead><tbody><tr v-for="o in data.done" :key="o._id" class="clickable" @click="selected = o"><td>{{ o.number }}</td><td>{{ o.customer.name }}</td><td>{{ o.branchName }}</td><td>{{ o.type }}</td><td class="num">{{ money(o.total) }}</td><td><span class="badge" :class="o.status === 'entregado' ? 'ok' : 'danger'">{{ LABEL[o.status] }}</span></td><td class="muted small">{{ dateTime(o.updatedAt) }}</td></tr></tbody></table></div></div>
+    <div v-if="tab === 'tablero' && data?.done.length" class="card" style="margin-top:1rem"><div class="card-head"><h3>Cerrados hoy ({{ data.done.length }})</h3></div><div class="table-wrap" style="box-shadow:none;border:none"><table class="table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Local</th><th>Tipo</th><th class="num">Total</th><th>Estado</th><th>Cuándo</th></tr></thead><tbody><tr v-for="o in data.done" :key="o._id" class="clickable" @click="selected = o"><td>{{ o.number }}</td><td>{{ o.customer.name }}</td><td>{{ o.branchName }}</td><td>{{ o.type }}</td><td class="num">{{ money(o.total) }}</td><td><span class="badge" :class="o.status === 'entregado' ? 'ok' : 'danger'">{{ LABEL[o.status] }}</span></td><td class="muted small">{{ dateTime(o.updatedAt) }}</td></tr></tbody></table></div></div>
     <BaseModal :open="Boolean(selected)" :title="selected ? `${selected.number} · ${LABEL[selected.status]}` : ''" @close="selected = null">
       <template v-if="selected">
         <dl class="kv"><dt>Cliente</dt><dd>{{ selected.customer.name }} · {{ selected.customer.phone }}</dd><dt>Canal</dt><dd>{{ CH[selected.channel] ?? selected.channel }}</dd><dt>Entrega</dt><dd>{{ selected.type === 'retiro' ? `Retiro en ${selected.branchName}` : `${selected.address.text} ${selected.address.reference ? `(${selected.address.reference})` : ''}` }}</dd><dt v-if="selected.scheduledFor">Para</dt><dd v-if="selected.scheduledFor">{{ selected.scheduledFor }}</dd><dt>Pago</dt><dd>{{ PAY[selected.payment.method] }} · {{ selected.payment.status }}{{ selected.payment.reference ? ` · ${selected.payment.reference}` : '' }}</dd><dt>Seguimiento</dt><dd><a :href="`/tienda/pedido/${selected.trackingCode}`" target="_blank">/tienda/pedido/{{ selected.trackingCode }}</a></dd></dl>
