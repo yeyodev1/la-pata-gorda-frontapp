@@ -6,8 +6,8 @@
  */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
-const SRC = 'https://res.cloudinary.com/tmm85q7f/video/upload/v1793163179/la-pata-gorda/brand/cangrejo-olla-mesa.mp4'
-const POSTER = 'https://res.cloudinary.com/tmm85q7f/image/upload/f_auto,q_auto,w_1280/v1793162829/la-pata-gorda/brand/cangrejo-poster.jpg'
+const SRC = 'https://res.cloudinary.com/tmm85q7f/video/upload/v1793163755/la-pata-gorda/brand/cangrejo-olla-mesa-v2.mp4'
+const POSTER = 'https://res.cloudinary.com/tmm85q7f/image/upload/f_auto,q_auto,w_1280/v1793163757/la-pata-gorda/brand/cangrejo-poster-v2.jpg'
 const root = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 const progress = ref(0)
@@ -51,7 +51,7 @@ onMounted(() => {
 onUnmounted(() => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf) })
 
 const stage = computed(() => (progress.value < 0.3 ? 0 : progress.value < 0.6 ? 1 : 2))
-const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, como hace 15 años.', 'Sale rojo, brillante y con las patas bien gordas, llenas de carne.', 'Y llega a tu mesa con maduro, salsa criolla y cocolón. O a tu casa.']
+const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, como hace 15 años.', 'Sale rojo, brillante y con las patas bien gordas, llenas de carne.', 'Y llega entero a tu mesa, humeante, con maduro, cocolón y salsa criolla. O a tu casa.']
 </script>
 <template>
   <section ref="root" class="vstory" aria-label="Así preparamos tu cangrejo">
