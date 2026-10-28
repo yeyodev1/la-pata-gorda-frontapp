@@ -101,9 +101,9 @@ const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, c
   </section>
 </template>
 <style scoped lang="scss">
-.story { position: relative; height: 240vh; margin: 0.5rem 0 1.5rem; }
-.story-sticky { position: sticky; top: calc(var(--story-top, 96px)); height: calc(100vh - var(--story-top, 96px) - 8px); display: flex; flex-direction: column; background: radial-gradient(circle at 50% 10%, #2a6fe8, #1f5fd6 40%, #0d2f78); border-radius: 22px; overflow: hidden; color: var(--cream); box-shadow: 0 16px 40px rgba(13,47,120,0.25); }
-.story-head { padding: 1.1rem 1.4rem 0; .story-kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.68rem; opacity: 0.85; } h2 { margin: 0.15rem 0 0; font-family: 'Archivo Black', 'Inter', sans-serif; font-size: clamp(1.2rem, 3vw, 1.8rem); color: var(--cream); } }
+.story { position: relative; height: 240vh; margin: 0; }
+.story-sticky { position: sticky; top: calc(var(--story-top, 100px)); height: calc(100vh - var(--story-top, 100px) - 12px); display: flex; flex-direction: column; background: radial-gradient(circle at 50% 10%, #2a6fe8, #1a52bd 40%, #0d2f78); border-radius: 22px; overflow: hidden; color: var(--cream); box-shadow: 0 16px 40px rgba(13,47,120,0.25); }
+.story-head { padding: 1.1rem 1.4rem 0; .story-kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.68rem; opacity: 0.85; } h2 { margin: 0.15rem 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: clamp(1.5rem, 3.4vw, 2.3rem); color: var(--cream); } }
 .story-scene { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 0 1rem; position: relative; }
 .scene { width: min(100%, 560px); height: 100%; max-height: 100%; overflow: visible; }
 .story-captions { position: absolute; left: 0; right: 0; bottom: 0.6rem; display: flex; justify-content: center; padding: 0 1rem; pointer-events: none; }
