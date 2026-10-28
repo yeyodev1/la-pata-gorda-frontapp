@@ -18,7 +18,7 @@ const PAY: Record<string, string> = { payphone: 'Tarjeta (Payphone)', local: 'Pa
 </script>
 <template>
   <div class="store"><div class="store-page">
-    <RouterLink to="/tienda" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver a la tienda</RouterLink>
+    <RouterLink to="/" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver a la tienda</RouterLink>
     <p v-if="error" class="err">{{ error }}</p>
     <template v-else-if="order">
       <h1>Pedido {{ order.number }}</h1>
