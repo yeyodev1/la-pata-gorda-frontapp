@@ -4,8 +4,7 @@ import { useRouter } from 'vue-router'
 import { shopApi, shopErrorMessage, type ShopProduct, type Storefront } from '@/services/shopApi'
 import { useCartStore } from '@/stores/cart'
 import { money } from '@/utils/format'
-import CrabLoader from '@/components/ui/CrabLoader.vue'
-import CrabStory from '@/components/shop/CrabStory.vue'
+import CrabVideo from '@/components/shop/CrabVideo.vue'
 
 const router = useRouter()
 const cart = useCartStore()
@@ -60,7 +59,7 @@ function goCheckout() { if (!cart.lines.length || !branch.value) return; cartOpe
 </script>
 <template>
   <div class="store">
-    <Transition name="splash"><div v-if="!data && !error" class="splash"><img src="/brand/logo.svg" alt="La Pata Gorda" class="splash-logo" /><CrabLoader text="Preparando el menú…" :size="170" light /><button v-if="slow" type="button" class="btn-hero ghost retry" @click="load"><i class="fa-solid fa-rotate" /> Está tardando, reintentar</button></div></Transition>
+    <Transition name="splash"><div v-if="!data && !error" class="splash"><img src="/brand/logo.svg" alt="La Pata Gorda" class="splash-logo" /><p class="splash-text">Preparando el menú…</p><span class="splash-bar"><span /></span><button v-if="slow" type="button" class="btn-hero ghost retry" @click="load"><i class="fa-solid fa-rotate" /> Está tardando, reintentar</button></div></Transition>
 
     <div class="topline"><span><i class="fa-solid fa-clock" /> Todos los días {{ hours.replace('-', ' a ') }}</span><span class="topline-r"><i class="fa-solid fa-location-dot" /> Guayaquil · Samborondón · Quito · Manta · Ambato · Miami</span></div>
     <header class="store-top" :class="{ scrolled }">
@@ -94,7 +93,7 @@ function goCheckout() { if (!cart.lines.length || !branch.value) return; cartOpe
         </div></section>
 
         <!-- Historia del cangrejo (scroll) -->
-        <section id="historia" class="band band-blue" style="padding-top:1rem;padding-bottom:1rem"><div class="band-inner"><CrabStory /></div></section>
+        <section id="historia" class="band band-blue" style="padding-top:1rem;padding-bottom:1rem"><div class="band-inner"><CrabVideo /></div></section>
 
         <!-- Menú -->
         <section id="menu" class="menu-band"><div class="band-inner" style="max-width:1240px;margin:0 auto">

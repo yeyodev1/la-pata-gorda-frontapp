@@ -61,7 +61,8 @@ $red: #e8572b;
 
 // ---------- Estados ----------
 .store-error, .loading { padding: 3rem 1rem; text-align: center; }
-.splash { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at 50% 30%, #2a6fe8, $blue 45%, $blue-d); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; .splash-logo { width: 150px; height: 150px; filter: drop-shadow(0 12px 30px rgba(0,0,0,0.35)); animation: popIn 0.6s cubic-bezier(.2,.9,.3,1.2); } .retry { margin-top: 0.5rem; } }
+.splash { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at 50% 30%, #2a6fe8, $blue 45%, $blue-d); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; .splash-logo { width: 150px; height: 150px; filter: drop-shadow(0 12px 30px rgba(0,0,0,0.35)); animation: popIn 0.6s cubic-bezier(.2,.9,.3,1.2); } .splash-text { margin: 0.9rem 0 0.4rem; font-family: $serif; font-size: 1.3rem; color: $cream; } .splash-bar { width: 180px; height: 4px; border-radius: 4px; background: rgba(246,239,214,0.25); overflow: hidden; display: block; span { display: block; width: 40%; height: 100%; background: $red; border-radius: 4px; animation: slide 1.2s ease-in-out infinite; } } .retry { margin-top: 1rem; } }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
 .splash-enter-active, .splash-leave-active { transition: opacity 0.45s ease, transform 0.45s ease; }
 .splash-leave-to { opacity: 0; transform: scale(1.04); }
 
