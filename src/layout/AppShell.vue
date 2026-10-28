@@ -92,7 +92,7 @@ async function logout() {
     <header class="topbar">
       <div class="topbar-left">
         <button class="menu-btn" type="button" :aria-label="drawerOpen ? 'Cerrar menú' : 'Abrir menú'" @click="drawerOpen = !drawerOpen"><i class="fa-solid" :class="drawerOpen ? 'fa-xmark' : 'fa-bars'" /></button>
-        <RouterLink to="/panel" class="brand"><span class="brand-mark"><img src="/brand/favicon.svg" alt="La Pata Gorda" /></span><span class="brand-text"><span class="brand-name">LA PATA GORDA</span><span class="brand-page">{{ pageTitle }}</span></span></RouterLink>
+        <RouterLink to="/panel" class="brand"><span class="brand-mark"><img src="/brand/logo.svg" alt="La Pata Gorda" /></span><span class="brand-text"><span class="brand-name">LA PATA GORDA</span><span class="brand-page">{{ pageTitle }}</span></span></RouterLink>
       </div>
       <div class="session">
         <RouterLink to="/alertas" class="icon-btn" title="Alertas"><i class="fa-solid fa-bell" /><span v-if="alertCount" class="pill">{{ alertCount > 99 ? '99+' : alertCount }}</span></RouterLink>
@@ -126,11 +126,11 @@ async function logout() {
 <style scoped lang="scss">
 @use '@/styles/mixins' as *;
 .shell { display: flex; flex-direction: column; min-height: 100dvh; }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: var(--navy-800); color: #fff; height: calc(var(--header-h) + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 0.75rem 0; position: sticky; top: 0; z-index: 30; border-bottom: 3px solid var(--amber-500); }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: var(--navy-800); color: #fff; height: calc(var(--header-h) + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 0.75rem 0; position: sticky; top: 0; z-index: 30; border-bottom: 3px solid var(--red-500); }
 .topbar-left { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 .menu-btn { background: none; border: none; color: #fff; font-size: 1.25rem; width: 40px; height: 40px; border-radius: 8px; @include md { display: none; } }
 .brand { display: flex; align-items: center; gap: 0.6rem; color: #fff; min-width: 0; }
-.brand-mark { width: 36px; height: 36px; border-radius: 9px; overflow: hidden; flex: none; img { width: 100%; height: 100%; display: block; } }
+.brand-mark { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; flex: none; box-shadow: 0 0 0 2px rgba(255,255,255,0.35); img { width: 100%; height: 100%; display: block; } }
 .brand-text { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
 .brand-name { font-weight: 800; letter-spacing: 0.12em; font-size: 0.68rem; opacity: 0.85; }
 .brand-page { font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
