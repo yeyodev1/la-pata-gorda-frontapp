@@ -33,8 +33,8 @@ const stage = computed(() => (progress.value < 0.38 ? 0 : progress.value < 0.72 
 const crabStyle = computed(() => {
   // en la olla: medio sumergido y bamboleando; sale: sube y crece; aterriza: baja al plato
   const bob = Math.sin(progress.value * 40) * 3 * (1 - lift.value)
-  const y = 150 - lift.value * 150 + land.value * 215 + bob
-  const scale = 0.85 + lift.value * 0.3 + land.value * 0.05
+  const y = 150 - lift.value * 95 + land.value * 160 + bob
+  const scale = 0.8 + lift.value * 0.25 + land.value * 0.1
   const rot = (1 - lift.value) * 4 * Math.sin(progress.value * 30) + lift.value * (1 - land.value) * -8
   return { transform: `translate(300px, ${y}px) rotate(${rot}deg) scale(${scale})`, '--crab': `color-mix(in srgb, #7a3a1e ${Math.round((1 - boil.value) * 100)}%, #e8572b)` } as Record<string, string>
 })
@@ -49,7 +49,7 @@ const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, c
     <div class="story-sticky">
       <div class="story-head"><p class="story-kicker">De la olla a tu mesa</p><h2>Así preparamos tu cangrejo</h2></div>
       <div class="story-scene">
-        <svg viewBox="0 0 600 520" class="scene" aria-hidden="true">
+        <svg viewBox="0 -40 600 560" class="scene" aria-hidden="true">
           <defs>
             <linearGradient id="potG" x1="0" x2="1"><stop offset="0" stop-color="#5b6470" /><stop offset=".5" stop-color="#8d97a3" /><stop offset="1" stop-color="#4b535e" /></linearGradient>
             <linearGradient id="salsaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a45" /><stop offset="1" stop-color="#c63a1a" /></linearGradient>
