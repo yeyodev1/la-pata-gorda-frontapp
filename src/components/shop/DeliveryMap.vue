@@ -12,6 +12,7 @@ const inputEl = ref<HTMLInputElement | null>(null)
 const acHost = ref<HTMLElement | null>(null)
 const acMode = ref<'nuevo' | 'clasico' | 'manual'>('manual')
 const status = ref<'cargando' | 'listo' | 'error'>('cargando')
+const errMsg = ref('')
 const locating = ref(false)
 let map: google.maps.Map | null = null
 let marker: google.maps.Marker | null = null
@@ -23,11 +24,19 @@ const center = computed(() => (props.branch?.lat != null && props.branch?.lng !=
 const distanceKm = computed(() => { const b = props.branch; const v = props.modelValue; if (!b || b.lat == null || b.lng == null || v.lat == null || v.lng == null) return null; const R = 6371, r = (d: number) => (d * Math.PI) / 180; const dLat = r(v.lat - b.lat), dLng = r(v.lng - b.lng); const a = Math.sin(dLat / 2) ** 2 + Math.cos(r(b.lat)) * Math.cos(r(v.lat)) * Math.sin(dLng / 2) ** 2; return Math.round(2 * R * Math.asin(Math.sqrt(a)) * 10) / 10 })
 const outOfRange = computed(() => Boolean(props.branch && props.branch.deliveryRadiusKm > 0 && distanceKm.value != null && distanceKm.value > props.branch.deliveryRadiusKm))
 
+type GoogleWindow = Window & { google?: { maps?: { importLibrary?: unknown } }; __lpgMaps?: Promise<void> }
+/** Carga el script de Google Maps una sola vez y espera a que `importLibrary` exista (el onload llega un instante antes). */
 function loadScript(key: string): Promise<void> {
-  const w = window as unknown as { google?: typeof google; __lpgMaps?: Promise<void> }
-  if (w.google?.maps?.places) return Promise.resolve()
+  const w = window as GoogleWindow
+  const ready = () => typeof w.google?.maps?.importLibrary === 'function'
+  if (ready()) return Promise.resolve()
   if (w.__lpgMaps) return w.__lpgMaps
-  w.__lpgMaps = new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&language=es&region=EC&loading=async`; s.async = true; s.onload = () => resolve(); s.onerror = () => reject(new Error('No se pudo cargar Google Maps')); document.head.appendChild(s) })
+  w.__lpgMaps = new Promise((resolve, reject) => {
+    const waitReady = (tries = 0) => { if (ready()) resolve(); else if (tries > 100) reject(new Error('Google Maps no terminó de cargar')); else setTimeout(() => waitReady(tries + 1), 100) }
+    if (document.querySelector('script[data-lpg-maps]')) { waitReady(); return }
+    const s = document.createElement('script'); s.dataset.lpgMaps = '1'; s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places,marker,geocoding&language=es&region=EC&loading=async`; s.async = true
+    s.onload = () => waitReady(); s.onerror = () => reject(new Error('No se pudo cargar Google Maps')); document.head.appendChild(s)
+  })
   return w.__lpgMaps
 }
 function setPoint(lat: number, lng: number, text?: string) {
@@ -81,7 +90,7 @@ onMounted(async () => {
       } catch { acMode.value = 'manual' }
     }
     status.value = 'listo'
-  } catch { status.value = 'error' }
+  } catch (err) { status.value = 'error'; errMsg.value = err instanceof Error ? `${err.name}: ${err.message}` : String(err); console.error('[mapa]', err) }
 })
 watch(() => props.branch, () => { drawBranch(); if (map && props.modelValue.lat == null) map.panTo(center.value) })
 onBeforeUnmount(() => { marker?.setMap(null); branchMarker?.setMap(null); circle?.setMap(null) })
@@ -89,7 +98,7 @@ onBeforeUnmount(() => { marker?.setMap(null); branchMarker?.setMap(null); circle
 <template>
   <div class="dmap">
     <div class="dmap-search"><i class="fa-solid fa-magnifying-glass" /><div v-show="acMode === 'nuevo'" ref="acHost" class="dmap-ac" /><input v-show="acMode !== 'nuevo'" ref="inputEl" :value="modelValue.text" placeholder="Escribe tu dirección y presiona Enter…" autocomplete="off" @input="emit('update:modelValue', { ...modelValue, text: ($event.target as HTMLInputElement).value })" @keydown.enter.prevent="searchTyped" @blur="acMode === 'manual' && searchTyped()" /><button type="button" class="dmap-loc" :disabled="locating" title="Usar mi ubicación" @click="useMyLocation"><i class="fa-solid" :class="locating ? 'fa-circle-notch fa-spin' : 'fa-location-crosshairs'" /></button></div>
-    <div class="dmap-canvas"><div ref="mapEl" class="dmap-map" /><p v-if="status === 'cargando'" class="dmap-state"><i class="fa-solid fa-circle-notch fa-spin" /> Cargando mapa…</p><p v-else-if="status === 'error'" class="dmap-state">No se pudo cargar el mapa. Escribe la dirección y referencia abajo.</p></div>
+    <div class="dmap-canvas"><div ref="mapEl" class="dmap-map" /><p v-if="status === 'cargando'" class="dmap-state"><i class="fa-solid fa-circle-notch fa-spin" /> Cargando mapa…</p><p v-else-if="status === 'error'" class="dmap-state">No se pudo cargar el mapa. Escribe la dirección y referencia abajo.<small style="display:block;opacity:0.6;font-weight:400">{{ errMsg }}</small></p></div>
     <p v-if="acMode === 'nuevo' && modelValue.text" class="dmap-sel"><i class="fa-solid fa-location-dot" /> {{ modelValue.text }}</p>
     <p class="dmap-hint"><i class="fa-solid fa-hand-pointer" /> Arrastra el pin rojo hasta tu puerta.<template v-if="distanceKm != null"> · <strong>{{ distanceKm }} km</strong> de {{ branch?.name }}</template></p>
     <p v-if="outOfRange" class="dmap-warn"><i class="fa-solid fa-triangle-exclamation" /> Queda fuera del radio de entrega de {{ branch?.name }} ({{ branch?.deliveryRadiusKm }} km). Elige otro local o retira en el local.</p>
