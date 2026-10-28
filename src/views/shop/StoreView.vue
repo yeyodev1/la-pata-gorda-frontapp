@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { shopApi, shopErrorMessage, type ShopProduct, type Storefront } from '@/services/shopApi'
 import { useCartStore } from '@/stores/cart'
 import { money } from '@/utils/format'
+import CrabLoader from '@/components/ui/CrabLoader.vue'
 
 const router = useRouter()
 const cart = useCartStore()
@@ -38,9 +39,10 @@ function goCheckout() { if (!cart.lines.length || !branch.value) return; cartOpe
 </script>
 <template>
   <div class="store">
+    <Transition name="splash"><div v-if="!data && !error" class="splash"><img src="/brand/logo.svg" alt="La Pata Gorda" class="splash-logo" /><CrabLoader text="Preparando el menú…" :size="170" light /></div></Transition>
     <header class="store-top">
       <div class="store-top-inner">
-        <RouterLink to="/" class="logo"><img src="/brand/favicon.svg" alt="" /><span><strong>La Pata Gorda</strong><small>Pedidos en línea</small></span></RouterLink>
+        <RouterLink to="/" class="logo"><img src="/brand/logo.svg" alt="La Pata Gorda" /><span><strong>La Pata Gorda</strong><small>Pedidos en línea</small></span></RouterLink>
         <button class="branch-btn" type="button" @click="branchOpen = true"><i class="fa-solid fa-location-dot" /><span v-if="branch"><strong>{{ branch.name }}</strong><small>{{ cart.type === 'retiro' ? `Retiro · listo en ~${branch.prepMinutes} min` : `A domicilio · envío ${money(branch.deliveryFee)}` }}</small></span><span v-else>Elige tu local</span><i class="fa-solid fa-chevron-down" /></button>
         <div class="top-actions"><RouterLink to="/tienda/reservar" class="link-btn"><i class="fa-solid fa-calendar-check" /> Reservar mesa</RouterLink><button class="cart-btn" type="button" @click="cartOpen = true"><i class="fa-solid fa-basket-shopping" /><span v-if="cart.count" class="count">{{ cart.count }}</span></button></div>
       </div>
@@ -49,15 +51,15 @@ function goCheckout() { if (!cart.lines.length || !branch.value) return; cartOpe
 
     <main class="store-main">
       <p v-if="error" class="store-error"><i class="fa-solid fa-triangle-exclamation" /> {{ error }}</p>
-      <div v-else-if="!data" class="loading"><i class="fa-solid fa-circle-notch fa-spin" /> Cargando el menú…</div>
+      <div v-else-if="!data" class="loading"><CrabLoader text="Preparando el menú…" :size="150" /></div>
       <template v-else>
-        <section class="hero"><div><p class="eyebrow">Cangrejo y mariscos desde 2010</p><h1>Pide tu Chopsué, tus cangrejos criollos y todo el menú</h1><p class="lead">Retira en el local o recíbelo en casa. {{ data.whatsapp ? `¿Dudas? Escríbenos al WhatsApp ${data.whatsapp}.` : '' }}</p><div class="mode"><button type="button" :class="{ on: cart.type === 'retiro' }" :disabled="branch ? !branch.pickupEnabled : false" @click="cart.type = 'retiro'"><i class="fa-solid fa-store" /> Retiro en local</button><button type="button" :class="{ on: cart.type === 'domicilio' }" :disabled="branch ? !branch.deliveryEnabled : false" @click="cart.type = 'domicilio'"><i class="fa-solid fa-motorcycle" /> A domicilio</button></div></div><div class="search"><i class="fa-solid fa-magnifying-glass" /><input v-model="search" placeholder="Buscar plato… (chopsué, ceviche, conchas)" /></div></section>
+        <section class="hero"><img class="hero-logo" src="/brand/logo.svg" alt="" /><div class="hero-text"><p class="eyebrow">Cangrejo y mariscos desde 2010 · Guayaquil</p><h1>Pide tu Chopsué, tus cangrejos criollos y todo el menú</h1><p class="lead">Retira en el local o recíbelo en casa. {{ data.whatsapp ? `¿Dudas? Escríbenos al WhatsApp ${data.whatsapp}.` : '' }}</p><div class="mode"><button type="button" :class="{ on: cart.type === 'retiro' }" :disabled="branch ? !branch.pickupEnabled : false" @click="cart.type = 'retiro'"><i class="fa-solid fa-store" /> Retiro en local</button><button type="button" :class="{ on: cart.type === 'domicilio' }" :disabled="branch ? !branch.deliveryEnabled : false" @click="cart.type = 'domicilio'"><i class="fa-solid fa-motorcycle" /> A domicilio</button></div></div></div><div class="search"><i class="fa-solid fa-magnifying-glass" /><input v-model="search" placeholder="Buscar plato… (chopsué, ceviche, conchas)" /></div></section>
         <section v-if="featured.length && !search" class="featured"><h2><i class="fa-solid fa-fire" /> Los favoritos</h2><div class="scroller"><button v-for="p in featured" :key="p.id" type="button" class="fcard" @click="open(p)"><img :src="p.image" :alt="p.name" loading="lazy" /><span class="fname">{{ p.name }}</span><span class="fprice">{{ money(p.price) }}</span></button></div></section>
         <section v-for="c in sections" :id="`cat-${c.id}`" :key="c.id" class="cat">
           <h2>{{ c.name }}</h2>
           <div class="grid"><button v-for="p in c.products" :key="p.id" type="button" class="pcard" @click="open(p)"><div class="ptext"><strong>{{ p.name }}</strong><p>{{ p.description }}</p><span class="price">{{ money(p.price) }}</span></div><div class="pimg" :class="{ empty: !p.image }"><img v-if="p.image" :src="p.image" :alt="p.name" loading="lazy" /><i v-else class="fa-solid fa-utensils" /><span class="add"><i class="fa-solid fa-plus" /></span></div></button></div>
         </section>
-        <footer class="store-foot"><p>La Pata Gorda · {{ data.branches.map((b) => b.city).filter((v, i, a) => a.indexOf(v) === i).join(' · ') }}</p><p v-if="branch"><i class="fa-solid fa-location-dot" /> {{ branch.name }} · {{ branch.address }} · {{ branch.hours }}</p></footer>
+        <footer class="store-foot"><p>La Pata Gorda · {{ (data?.branches ?? []).map((b) => b.city).filter((v, i, a) => a.indexOf(v) === i).join(' · ') }}</p><p v-if="branch"><i class="fa-solid fa-location-dot" /> {{ branch.name }} · {{ branch.address }} · {{ branch.hours }}</p></footer>
       </template>
     </main>
 
