@@ -33,7 +33,7 @@ const stage = computed(() => (progress.value < 0.38 ? 0 : progress.value < 0.72 
 const crabStyle = computed(() => {
   // en la olla: medio sumergido y bamboleando; sale: sube y crece; aterriza: baja al plato
   const bob = Math.sin(progress.value * 40) * 3 * (1 - lift.value)
-  const y = 150 - lift.value * 95 + land.value * 280 + bob
+  const y = 150 - lift.value * 95 + land.value * 205 + bob
   const scale = 0.8 + lift.value * 0.25 + land.value * 0.1
   const rot = (1 - lift.value) * 4 * Math.sin(progress.value * 30) + lift.value * (1 - land.value) * -8
   void rot
@@ -41,7 +41,7 @@ const crabStyle = computed(() => {
 })
 const potStyle = computed(() => ({ transform: `translateY(${land.value * 260}px)`, opacity: String(1 - land.value) }))
 const lidStyle = computed(() => ({ transform: `translate(${lift.value * 150}px, ${-lift.value * 90}px) rotate(${lift.value * 25}deg)`, opacity: String(1 - land.value) }))
-const tableStyle = computed(() => ({ transform: `translateY(${(1 - land.value) * 220 - land.value * 70}px)`, opacity: String(land.value) }))
+const tableStyle = computed(() => ({ transform: `translateY(${(1 - land.value) * 220 - land.value * 145}px)`, opacity: String(land.value) }))
 const steamStyle = computed(() => ({ opacity: String(0.25 + boil.value * 0.6 - land.value) }))
 const captions = ['Cocinamos el cangrejo en nuestra salsa criolla, en la olla, como hace 15 años.', 'Patas bien gordas, llenas de carne. Así de rojo sale.', 'Y a tu mesa: con maduro, salsa criolla y cocolón. O a tu casa.']
 </script>
