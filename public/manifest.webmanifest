@@ -1,0 +1,9 @@
+{
+  "name": "La Pata Gorda",
+  "short_name": "Pata Gorda",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf7f2",
+  "theme_color": "#8f1d1d",
+  "icons": [{ "src": "/brand/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
