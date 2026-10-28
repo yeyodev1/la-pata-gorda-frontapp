@@ -11,7 +11,7 @@ const data = ref<Storefront | null>(null)
 const form = ref({ name: '', phone: '', email: '', address: '', reference: '', notes: '', scheduledFor: '', payment: '' })
 const busy = ref(false)
 const error = ref('')
-onMounted(async () => { if (!cart.lines.length) { router.replace('/tienda'); return } try { data.value = await shopApi.storefront(); try { const saved = JSON.parse(localStorage.getItem('lpg.customer') ?? 'null'); if (saved) Object.assign(form.value, saved) } catch { /* privado */ } form.value.payment = defaultPayment() } catch (err) { error.value = shopErrorMessage(err) } })
+onMounted(async () => { if (!cart.lines.length) { router.replace('/'); return } try { data.value = await shopApi.storefront(); try { const saved = JSON.parse(localStorage.getItem('lpg.customer') ?? 'null'); if (saved) Object.assign(form.value, saved) } catch { /* privado */ } form.value.payment = defaultPayment() } catch (err) { error.value = shopErrorMessage(err) } })
 const branch = computed(() => data.value?.branches.find((b) => b.id === cart.branch) ?? null)
 const deliveryFee = computed(() => (cart.type === 'domicilio' ? branch.value?.deliveryFee ?? 0 : 0))
 const total = computed(() => Math.round((cart.subtotal + deliveryFee.value) * 100) / 100)
@@ -32,7 +32,7 @@ async function submit() {
 </script>
 <template>
   <div class="store"><div class="store-page">
-    <RouterLink to="/tienda" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver al menú</RouterLink>
+    <RouterLink to="/" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver al menú</RouterLink>
     <h1>Confirma tu pedido</h1>
     <p v-if="error" class="err">{{ error }}</p>
     <div class="card-s"><h3><i class="fa-solid fa-location-dot" /> {{ cart.type === 'retiro' ? 'Retiro en' : 'Envío desde' }} {{ branch?.name }}</h3><p class="hint-s">{{ branch?.address }} · {{ branch?.hours }}{{ cart.type === 'retiro' ? ` · listo en ~${branch?.prepMinutes} min` : '' }}</p></div>
