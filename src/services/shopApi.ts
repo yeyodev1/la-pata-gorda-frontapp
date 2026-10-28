@@ -2,7 +2,8 @@ import axios from 'axios'
 
 /** API pública de la tienda (sin sesión). */
 const base = (import.meta.env.VITE_API_URL ?? 'http://localhost:8400/api').replace(/\/api\/?$/, '')
-const pub = axios.create({ baseURL: `${base}/public` })
+const pub = axios.create({ baseURL: `${base}/public`, timeout: 25000 })
+const CACHE_KEY = 'lpg.storefront'
 
 export interface ShopBranch { id: string; code: string; name: string; city: string; address: string; phone: string; hours: string; pickupEnabled: boolean; deliveryEnabled: boolean; deliveryFee: number; minOrder: number; prepMinutes: number; whatsapp: string; mapsUrl: string; capacity: number; privateTables: { name: string; capacity: number }[] }
 export interface ShopOption { name: string; required: boolean; max: number; choices: { label: string; price: number }[] }
@@ -13,7 +14,14 @@ export interface CheckoutBody { branch: string; type: 'retiro' | 'domicilio'; cu
 export interface TrackedOrder { number: string; trackingCode: string; branchName: string; type: 'retiro' | 'domicilio'; customer: { name: string }; address: { text: string; reference: string }; items: { name: string; qty: number; unitPrice: number; options: { name: string; choice: string; price: number }[]; notes: string; lineTotal: number }[]; subtotal: number; deliveryFee: number; total: number; payment: { method: string; status: string }; status: string; estimatedMinutes: number; scheduledFor: string; timeline: { status: string; at: string; by: string; note: string }[]; createdAt: string; cancelReason: string }
 
 export const shopApi = {
-  storefront: async () => (await pub.get<Storefront>('/storefront')).data,
+  /** Menú: si hay copia en el navegador se devuelve al instante y se refresca en segundo plano. */
+  storefront: async (): Promise<Storefront> => {
+    let cached: Storefront | null = null
+    try { const raw = localStorage.getItem(CACHE_KEY); if (raw) { const c = JSON.parse(raw) as { at: number; data: Storefront }; if (Date.now() - c.at < 6 * 3600000) cached = c.data } } catch { /* privado */ }
+    const fetchFresh = async () => { const d = (await pub.get<Storefront>('/storefront')).data; try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: d })) } catch { /* privado */ } return d }
+    if (cached) { void fetchFresh().catch(() => undefined); return cached }
+    return fetchFresh()
+  },
   checkout: async (body: CheckoutBody) => (await pub.post<{ number: string; trackingCode: string; total: number; paymentUrl: string | null; status: string }>('/checkout', body)).data,
   track: async (code: string) => (await pub.get<{ order: TrackedOrder }>(`/orders/${code}`)).data.order,
   payphoneConfirm: async (order: string, id: string, clientTransactionId: string) => (await pub.post<{ status: string; payment: string; trackingCode: string }>('/payphone/confirm', { order, id, clientTransactionId })).data,
