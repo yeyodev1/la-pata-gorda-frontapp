@@ -14,9 +14,9 @@ async function submit() { busy.value = true; error.value = ''; try { const r = a
 </script>
 <template>
   <div class="store"><div class="store-page">
-    <RouterLink to="/tienda" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver a la tienda</RouterLink>
+    <RouterLink to="/" class="link-btn"><i class="fa-solid fa-arrow-left" /> Volver a la tienda</RouterLink>
     <h1>Reserva tu mesa</h1>
-    <div v-if="done" class="card-s"><p class="ok-box"><i class="fa-solid fa-circle-check" /> {{ done.message }}</p><p class="hint-s">Reserva {{ done.number }} · {{ done.status === 'confirmada' ? 'confirmada' : 'pendiente de confirmación' }}</p><RouterLink to="/tienda" class="btn-s" style="margin-top:0.5rem">Ver el menú</RouterLink></div>
+    <div v-if="done" class="card-s"><p class="ok-box"><i class="fa-solid fa-circle-check" /> {{ done.message }}</p><p class="hint-s">Reserva {{ done.number }} · {{ done.status === 'confirmada' ? 'confirmada' : 'pendiente de confirmación' }}</p><RouterLink to="/" class="btn-s" style="margin-top:0.5rem">Ver el menú</RouterLink></div>
     <form v-else @submit.prevent="submit">
       <p v-if="error" class="err">{{ error }}</p>
       <div class="card-s"><div class="f"><label>Local</label><select v-model="form.branch"><option v-for="b in data?.branches" :key="b.id" :value="b.id">{{ b.name }} · {{ b.city }}</option></select></div><div class="f-row"><div class="f"><label>Fecha</label><input v-model="form.date" type="date" :min="todayStr()" required /></div><div class="f"><label>Hora</label><input v-model="form.time" type="time" required /></div><div class="f"><label>Personas</label><input v-model.number="form.people" type="number" min="1" max="60" required /></div></div>
