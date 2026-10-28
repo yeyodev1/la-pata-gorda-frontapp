@@ -1,0 +1,8 @@
+{
+  // Frontend de La Pata Gorda (Vue 3 + Vite) servido como estáticos en Cloudflare Workers (Static Assets).
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "la-pata-gorda-app",
+  "account_id": "4c5de28d502b308c4a7fd8b294e032a5",
+  "compatibility_date": "2026-10-20",
+  "assets": { "directory": "./dist", "not_found_handling": "single-page-application" }
+}
