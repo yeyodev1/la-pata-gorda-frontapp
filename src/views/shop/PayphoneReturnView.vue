@@ -11,7 +11,7 @@ onMounted(async () => {
   const code = String(route.query.order ?? '')
   const id = String(route.query.id ?? '')
   const clientTx = String(route.query.clientTransactionId ?? route.query.clientTxId ?? '')
-  if (!code) { router.replace('/tienda'); return }
+  if (!code) { router.replace('/'); return }
   if (!id) { router.replace(`/tienda/pedido/${code}`); return }
   try { const r = await shopApi.payphoneConfirm(code, id, clientTx); msg.value = r.payment === 'pagado' ? '¡Pago aprobado!' : 'El pago no fue aprobado.'; setTimeout(() => router.replace(`/tienda/pedido/${r.trackingCode}`), 1200) } catch (err) { error.value = shopErrorMessage(err) }
 })
