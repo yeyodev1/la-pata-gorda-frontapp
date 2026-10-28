@@ -55,7 +55,7 @@
 .splash { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at 50% 30%, #2a6fe8, var(--navy-800) 45%, var(--navy-900)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; .splash-logo { width: 150px; height: 150px; filter: drop-shadow(0 12px 30px rgba(0,0,0,0.35)); animation: popIn 0.6s cubic-bezier(.2,.9,.3,1.2); } }
 .splash-enter-active, .splash-leave-active { transition: opacity 0.45s ease, transform 0.45s ease; }
 .splash-leave-to { opacity: 0; transform: scale(1.04); }
-.store-main > section { animation: rise 0.5s ease both; }
+.store-main > section:not(.story) { animation: rise 0.5s ease both; }
 .store-main > section:nth-child(2) { animation-delay: 0.08s; } .store-main > section:nth-child(3) { animation-delay: 0.16s; }
 .pcard { animation: rise 0.4s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
