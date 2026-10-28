@@ -28,7 +28,7 @@ async function submit() {
 <template>
   <div class="login">
     <form class="card login-card" @submit.prevent="submit">
-      <div class="brand"><img class="logo" src="/brand/favicon.svg" alt="La Pata Gorda" /><h1>La Pata Gorda</h1><p class="muted small">Locales, producción, inventario y atención en un solo lugar</p></div>
+      <div class="brand"><img class="logo" src="/brand/favicon.svg" alt="La Pata Gorda" /><h1>La Pata Gorda</h1><p class="hint"><RouterLink to="/">Ir a la tienda</RouterLink></p><p class="muted small">Locales, producción, inventario y atención en un solo lugar</p></div>
       <div class="field"><label>Correo</label><input v-model="email" class="input" type="email" autocomplete="username" inputmode="email" required autofocus /></div>
       <div class="field"><label>Contraseña</label><div class="pw"><input v-model="password" class="input" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required /><button type="button" class="btn ghost icon" @click="showPassword = !showPassword"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'" /></button></div></div>
       <p v-if="error" class="alert-box danger"><i class="fa-solid fa-circle-xmark" /> {{ error }}</p>
